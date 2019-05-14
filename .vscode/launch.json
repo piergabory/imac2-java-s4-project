@@ -1,0 +1,11 @@
+{
+  "configurations": [
+    {
+      "type": "java",
+      "name": "CodeLens (Launch) - MainUi",
+      "request": "launch",
+      "mainClass": "fr.upem.capcha.ui.MainUi",
+      "projectName": "CaptchIMAC"
+    }
+  ]
+}
