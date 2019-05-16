@@ -1,8 +1,8 @@
 package fr.upem.capcha.captchaModel;
 
+/* ---- imports ---- */
 import fr.upem.capcha.ImagesPublicInterface.Images; // Implemented by the class
 
-// Imported Utilities
 import java.util.List;                    // data structure used for the properties
 import java.util.stream.Stream;           // used for mapping, reducing and other functional programming techniques
 import java.util.stream.Collectors;       // used to convert back Streams into Lists
@@ -15,52 +15,63 @@ import java.util.Objects;                 // used to check for failed URL to URI
 import java.net.MalformedURLException;    // thrown on failed URI to URL conversion
 
 
+/**
+ * @class Category
+ * @brief Provides images sorted in a category tree
+ */
 class Category implements Images {
-
-  // Describes the photo category to the user
+  
+  /// @brief Describes the photo category to the user
   private final String name;
 
-  // Lists subcategories of the category
+  /// @brief Lists subcategories of the category
   private final List<Category> subcategories;
 
-  // photos at the top of the category tree. excludes all sub categories photos.
+  /// @brief photos at the top of the category tree. excludes all sub categories photos.
   private final List<URL> photos;
 
 
-  // returns a randomly choozen sub-category
+  /**
+   * @brief getter on a random first-level sub-category
+   * @return returns a randomly choozen sub-category 
+   */
   public Category getRandomSubCategory() {
     if(subcategories.isEmpty()) return null;
 
     // initialize randomizer
-    var randomizer = new Random();
     // set the seed to the UNIX timestamp
+    var randomizer = new Random();
     randomizer.setSeed(System.currentTimeMillis());
 
     return subcategories.get(randomizer.nextInt(subcategories.size()));
   }
 
-  // recursively gathers all the photos in the category and subcategories
+  /**
+   * @brief recursively gathers all the photos in the category and its subcategories
+   * @return collection of URLs
+   */
   public List<URL> getPhotos() {
     return subcategories.stream()
-
       // gather all the subcategory photos in an list of lists (for each category).
-      .map(subcategory -> subcategory.getPhotos())
-
+      .map(subcategory -> subcategory.getPhotos().stream())
       // combine the lists into the root image list.
-      .reduce(photos, (accumulator, subcategoryPhotos) -> {
-        accumulator.addAll(subcategoryPhotos);
-        return accumulator;
-      });
+      .reduce(photos.stream(), Stream::concat)
+      
+      .collect(Collectors.toList());
   }
 
-  // get {count} random photos from the category
+  /**
+   * @brief selects a random sample of all the photos in the category.
+   * @param count size of the returned sample
+   * @return random subset of all the photos URLs.
+   */
   public List<URL> getRandomPhotosURL(int count) {
     // get all the category photos
     var allPhotos = getPhotos();
 
     // initialize randomizer
-    var randomizer = new Random();
     // set the seed to the UNIX timestamp
+    var randomizer = new Random();
     randomizer.setSeed(System.currentTimeMillis());
 
     return randomizer
@@ -72,22 +83,36 @@ class Category implements Images {
       .collect(Collectors.toList());
   }
 
-  // returns a random photo from the category
+  /**
+   * @brief alias of getRandomPhotosURL for a single photo
+   * @return a single photo URL
+   */
   public URL getRandomPhotoURL() {
     return getRandomPhotosURL(1).get(0);
   }
 
-  // checks if URL points to a photo member of the category
+  /**
+   * @brief checks recursively if URL points to a photo member of the category or its subcategories
+   * @param photo needle URL searched in all photo
+   * @return boolean, true if the URL is a member of the category
+   */
   public boolean isPhotoCorrect(URL photo) {
     return getPhotos().contains(photo);
   }
 
-  // category description name getter
+  /**
+   * @brief category name getter.
+   * @return name property
+   */
   public String name() {
     return name;
   }
 
-  // Remaps recursively the directory tree in memory
+  /**
+   * @constructor Category
+   * @brief scans through a directory on the disk to construct the photo categories tree
+   * @param directoryPath target directory
+   */
   public Category(Path directoryPath) {
     // stores all the entries in the directory (subs and images)
     Stream<File> entries;
@@ -100,12 +125,24 @@ class Category implements Images {
       entries = Stream.empty();
     }
 
+    // set class properties
+    subcategories = createCategoriesFromDirectoryEntries(entries);
+    photos = createImageListFromDirectoryEntries(entries);
+
     // sets the category name as the directory name.
     name = directoryPath.getFileName().toString();
+  }  
 
-    
-    // filters all the directory entries and recursively calls new Category constructor for the path
-    subcategories = entries
+  /**
+   * @brief static private, constructor helper method extracting subcategories from a stream of files.
+   * @param entries stream of Files object to parse
+   * @return List of categoriess
+   * 
+   * the category constructor is called for each direcotry, building the tree recursively.
+   * coded in declarative style programming
+   */
+  private static List<Category> createCategoriesFromDirectoryEntries(Stream<File> entries) {
+    return entries
       // filter the subdirectories out of the image files
       .filter(File::isDirectory)
       // convert each file into a path object
@@ -114,10 +151,18 @@ class Category implements Images {
       .map(Category::new)
       // recollect the category stream into a list.
       .collect(Collectors.toList());
+  }
 
-
-    // filters all the photos entries and converts them into an URL array
-    photos = entries
+  /**
+   * @brief static private, helper method extracting images in a stream of files
+   * @param entries stream of Files object to parse
+   * @return List of URL photos
+   * 
+   * Only files at the root of the target directory are scanned.
+   * coded in declarative style programming
+   */
+  private static List<URL> createImageListFromDirectoryEntries(Stream<File> entries) {
+    return entries
       // filters the images out of the directories
       .filter(File::isFile)
       // convert the file object into an Universal Ressource Idebntifier
@@ -140,5 +185,5 @@ class Category implements Images {
       .filter(Objects::nonNull)
       // collect the URL stream into a List
       .collect(Collectors.toList());
-  }  
+  }
 }
