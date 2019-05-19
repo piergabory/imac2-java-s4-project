@@ -1,5 +1,6 @@
 package fr.upem.capcha.images.vehicules;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 
@@ -15,7 +16,7 @@ public class Vehicule extends Category {
     }
   }
   
-  Vehicule() {
+  Vehicule() throws IOException {
      super(getClassDirectoryPath());
   }
 }

@@ -1,1 +1,0 @@
-e-learning: https://elearning.u-pem.fr/course/view.php?id=5403

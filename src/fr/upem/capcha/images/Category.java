@@ -1,43 +1,45 @@
 package fr.upem.capcha.images;
 
-import java.util.ArrayList;
 import java.util.List;                    // data structure used for the properties
 import java.util.stream.Stream;           // used for mapping, reducing and other functional programming techniques
 import java.util.stream.Collectors;       // used to convert back Streams into Lists
 import java.nio.file.Path;                // used to locate Category directories
 import java.nio.file.Files;               // used to read the category Directory
 import java.io.File;                      // used to filter subdirectories and files
-import java.net.URL;                      // used to represent Photos
-import java.util.Random;                  // used to generate random indexes for the random image getter
-import java.util.Objects;                 // used to check for failed URL to URI conversions
-import java.net.MalformedURLException;    // thrown on failed URI to URL conversion
+import java.io.IOException;
+import java.net.URL; // used to represent Photos
+import java.util.Random; // used to generate random indexes for the random image getter
+import java.util.Objects; // used to check for failed URL to URI conversions
+import java.net.MalformedURLException; // thrown on failed URI to URL conversion
 import java.net.URISyntaxException;
-
 
 /**
  * @class Category
  * @brief Provides images sorted in a category tree
  */
 
-//represents a more or less precise category of image
+// represents a more or less precise category of image
 public class Category implements Images {
-  
+
+  private static final String[] SUPPORTED_FILE_TYPES = {"jpeg", "png", "jpg", "gif"};
+
   /// @brief Describes the photo category to the user
   private final String name;
 
   /// @brief Lists subcategories of the category
   private final List<Category> subcategories;
 
-  /// @brief photos at the top of the category tree. excludes all sub categories photos.
+  /// @brief photos at the top of the category tree. excludes all sub categories
+  /// photos.
   private final List<URL> photos;
-
 
   /**
    * @brief getter on a random first-level sub-category
-   * @return returns a randomly choozen sub-category 
+   * @return returns a randomly choozen sub-category
    */
   public Category getRandomSubCategory() {
-    if(subcategories.isEmpty()) return null;
+    if (subcategories.isEmpty())
+      return null;
 
     // initialize randomizer
     // set the seed to the UNIX timestamp
@@ -48,7 +50,8 @@ public class Category implements Images {
   }
 
   /**
-   * @brief recursively gathers all the photos in the category and its subcategories
+   * @brief recursively gathers all the photos in the category and its
+   *        subcategories
    * @return collection of URLs
    */
   public List<URL> getPhotos() {
@@ -57,7 +60,6 @@ public class Category implements Images {
       .map(subcategory -> subcategory.getPhotos().stream())
       // combine the lists into the root image list.
       .reduce(photos.stream(), Stream::concat)
-      
       .collect(Collectors.toList());
   }
 
@@ -67,6 +69,8 @@ public class Category implements Images {
    * @return random subset of all the photos URLs.
    */
   public List<URL> getRandomPhotosURL(int count) {
+    assert count > 0 ;
+  
     // get all the category photos
     var allPhotos = getPhotos();
 
@@ -93,7 +97,8 @@ public class Category implements Images {
   }
 
   /**
-   * @brief checks recursively if URL points to a photo member of the category or its subcategories
+   * @brief checks recursively if URL points to a photo member of the category or
+   *        its subcategories
    * @param photo needle URL searched in all photo
    * @return boolean, true if the URL is a member of the category
    */
@@ -108,27 +113,37 @@ public class Category implements Images {
   public String name() {
     return name;
   }
-  
+
+  private boolean isEmpty() {
+    return photos.isEmpty() && subcategories.isEmpty();
+  }
+
+  private boolean notEmpty() {
+    return !isEmpty();
+  }
+
   public static Category getAll() {
-	 return new Category(getClassDirectoryPath());
+    try {
+      var path = getClassDirectoryPath();
+      return new Category(path);
+    } catch(IOException exception) {
+      System.err.println("Failed to access picture directory");
+      return null;
+    }
   }
 
   /**
    * @constructor Category
-   * @brief scans through a directory on the disk to construct the photo categories tree
+   * @brief scans through a directory on the disk to construct the photo
+   *        categories tree
    * @param directoryPath target directory
    */
-  public Category(Path directoryPath) {
+  public Category(Path directoryPath) throws IOException{
     // stores all the entries in the directory (subs and images)
-    Stream<File> entries;
+    List<File> entries;
 
     // Tries to load the entries. If fails the directoryPath is probably invalid.
-    try {
-      entries = Files.list(directoryPath).map(Path::toFile);
-    } catch (Exception exception) {
-      exception.printStackTrace();
-      entries = Stream.empty();
-    }
+    entries = Files.list(directoryPath).map(Path::toFile).collect(Collectors.toList());
 
     // set class properties
     subcategories = createCategoriesFromDirectoryEntries(entries);
@@ -148,22 +163,20 @@ public class Category implements Images {
    * the category constructor is called for each direcotry, building the tree recursively.
    * coded in declarative style programming
    */
-  private static List<Category> createCategoriesFromDirectoryEntries(Stream<File> entries) {
-    var images = entries
-      // filter the subdirectories out of the image files
+  private static List<Category> createCategoriesFromDirectoryEntries(List<File> entries) {
+    return entries.stream()
       .filter(File::isDirectory)
-      // convert each file into a path object
       .map(File::toPath)
-      // convert each path into a new Category 
-      .map(Category::new);
-      // recollect the category stream into a list.
-	
-  
-    System.out.print(images.count());
-    
-	if (images.count() == 0) 
-    	return new ArrayList<Category>();
-     return images.collect(Collectors.toList());
+      .map(path -> {
+        try {
+          return new Category(path);
+        } catch(IOException exception) {
+          return null;
+        }
+      })
+      .filter(Objects::nonNull)
+      .filter(Category::notEmpty)
+      .collect(Collectors.toList());
   }
 
   /**
@@ -174,30 +187,26 @@ public class Category implements Images {
    * Only files at the root of the target directory are scanned.
    * coded in declarative style programming
    */
-  private static List<URL> createImageListFromDirectoryEntries(Stream<File> entries) {
-    return entries
-      // filters the images out of the directories
-      // TODO: Filter out class files
+  private static List<URL> createImageListFromDirectoryEntries(List<File> entries) {
+    // filters the images out of the directories
+    // TODO: Filter out class files
+    return entries.stream()
       .filter(File::isFile)
-      // convert the file object into an Universal Ressource Idebntifier
-      .map(File::toURI)
-      // convert the URI into an URL, if the file name is invalid:
-      // - an error is thrown in the console, 
-      // - the file is ignored and the collection continues
+      .filter(
+        file -> Stream.of(SUPPORTED_FILE_TYPES).anyMatch(
+          suffix -> file.getName().toLowerCase().endsWith(suffix)
+        )
+      )
+      .map(File::toURI) 
       .map(URI -> {
-        URL returned;
         try { 
-          returned = URI.toURL();
+          return URI.toURL();
         } catch(MalformedURLException exception) {
           System.err.println(exception.getLocalizedMessage());
-          exception.printStackTrace();
-          returned = null;
+          return null;
         }
-        return returned;
       })
-      // filter out failed URI to URL conversions
       .filter(Objects::nonNull)
-      // collect the URL stream into a List
       .collect(Collectors.toList());
   }
   
@@ -207,5 +216,6 @@ public class Category implements Images {
 	    } catch(URISyntaxException error) {
 	      return null;
 	    }
-	}
+  }
+
 }

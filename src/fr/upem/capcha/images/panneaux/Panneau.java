@@ -2,6 +2,7 @@ package fr.upem.capcha.images.panneaux;
 
 import fr.upem.capcha.images.Category;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 
@@ -14,7 +15,7 @@ public class Panneau extends Category {
     }
   }
   
-  Panneau() {
+  Panneau() throws IOException {
      super(getClassDirectoryPath());
   }
 }

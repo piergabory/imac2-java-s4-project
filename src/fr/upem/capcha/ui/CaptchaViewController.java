@@ -10,6 +10,11 @@ public class CaptchaViewController implements CaptchaViewDelegate {
   private ImagesProvider provider = new ImagesProvider();
   private CaptchaView captchaView = new CaptchaView();
 
+  public CaptchaViewController() {
+    captchaView.setDelegate(this);
+    captchaView.draw();
+  }
+
   @Override
   public void captchaUISubmitPhotosAction(List<URL> photos) {
     provider.isSelectionCorrect(photos, captchaView::setMessage);

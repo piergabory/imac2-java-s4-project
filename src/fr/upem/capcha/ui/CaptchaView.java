@@ -1,6 +1,5 @@
 package fr.upem.capcha.ui;
 
-import java.awt.GridLayout;
 import java.net.URL;
 import java.util.List;
 
@@ -21,7 +20,7 @@ interface CaptchaViewDelegate {
 public class CaptchaView extends JFrame {
   private static final long serialVersionUID = 1L;
   private CaptchaViewDelegate delegate;
-  private String message;
+  private String message = "Cliquez n'importe où ... juste pour tester l'interface !";
   private SelectablePhotoGridView selectionGrid;
 
   public CaptchaView() {
@@ -31,24 +30,26 @@ public class CaptchaView extends JFrame {
     setResizable(false); 
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     
-    setLayout(new GridLayout(3, 1));
-    update();
-    
+    // setLayout(new GridLayout(3, 1));
     setVisible(true);
   }
 
-  public void update() {
+  public void draw() {
     removeAll();
+    
     var capchaPhotos = delegate.capchaUIDisplayedPhotos();
     selectionGrid = new SelectablePhotoGridView(capchaPhotos);
+    
     add(selectionGrid);
 		add(new JTextArea(message));
-		add(createOkButton());
+    add(createOkButton());
+
+    revalidate();
   }
 
   public void setMessage(String message) {
     this.message = message;
-    update();
+    draw();
   }
 
   private JButton createOkButton(){
@@ -59,5 +60,13 @@ public class CaptchaView extends JFrame {
 				EventQueue.invokeLater(() -> delegate.captchaUISubmitPhotosAction(selectionGrid.selected()));
 			}
 		});
-	}
+  }
+  
+  /**
+   * @param delegate the delegate to set
+   */
+  public void setDelegate(CaptchaViewDelegate delegate) {
+    this.delegate = delegate;
+  }
+
 }

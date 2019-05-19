@@ -20,6 +20,7 @@ class SelectablePhotoGridView extends JPanel {
 
   public SelectablePhotoGridView(List<URL> photos) {
     super();
+
     int rowsCount = photos.size() / COLUMNS_COUNT + 1;
     setLayout(new GridLayout(COLUMNS_COUNT, rowsCount));
     
