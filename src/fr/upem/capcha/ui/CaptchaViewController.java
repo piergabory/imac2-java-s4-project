@@ -46,7 +46,7 @@ public class CaptchaViewController implements CaptchaViewDelegate {
 
   @Override
   public List<URL> capchaUIDisplayedPhotos() {
-    return provider.getPhotoTestBatch(9, 4);
+    return provider.getPhotoTestBatch();
   }
 
   @Override

@@ -21,7 +21,9 @@ import java.net.URISyntaxException;
 // represents a more or less precise category of image
 public class Category implements Images {
 
+  private static final String PHOTOS_ROOT_DIRECTORY = "assets";
   private static final String[] SUPPORTED_FILE_TYPES = {"jpeg", "png", "jpg", "gif"};
+
   private static final Random randomizer = new Random(System.currentTimeMillis());
 
   /// @brief Describes the photo category to the user
@@ -98,6 +100,10 @@ public class Category implements Images {
    */
   public String name() {
     return name;
+  }
+
+  public boolean hasSubcategories() {
+    return !subcategories.isEmpty();
   }
 
   private boolean isEmpty() {
@@ -192,7 +198,7 @@ public class Category implements Images {
   
   static final Path getClassDirectoryPath(){
 	  	try { 
-	      return Path.of(Category.class.getResource("assets").toURI());
+	      return Path.of(Category.class.getResource(PHOTOS_ROOT_DIRECTORY).toURI());
 	    } catch(URISyntaxException error) {
 	      return null;
 	    }

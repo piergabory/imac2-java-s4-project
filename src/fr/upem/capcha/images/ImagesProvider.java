@@ -17,6 +17,7 @@ public class ImagesProvider {
 	
 	private final Category allImages; //all existing images
 	private Category targetCategory; //the category the user has to select the images of
+	private int capchaSize = 9;
 	private int targetCount;
 	
 
@@ -26,38 +27,57 @@ public class ImagesProvider {
 	}
 	
 	//returns a list of correct and incorrect images
-	public List<URL> getPhotoTestBatch(int size, int maxTargetPhotosCount) {
-		assert size < maxTargetPhotosCount;
-		
+	public List<URL> getPhotoTestBatch() {
+
 		var randomizer = new Random();
 		randomizer.setSeed(System.currentTimeMillis());
 		
-		var batch = new ArrayList<URL>(size);
-		targetCount = randomizer.nextInt(maxTargetPhotosCount - 1) + 1;
+		var batch = new ArrayList<URL>(capchaSize);
+		targetCount = randomizer.nextInt(capchaSize/3 - 1) + 1;
 		
 		batch.addAll(targetCategory.getRandomPhotosURL(targetCount));	
 		
-		while(batch.size() < size) {
+		while(batch.size() < capchaSize) {
 			var image = allImages.getRandomPhotoURL();
 			if (targetCategory.isPhotoCorrect(image)) continue;
-			batch.add(image);
+			batch.add(randomizer.nextInt(batch.size()), image);
 		}
 		
 		return batch;
 	}
 	//checks if all the images in the selection are correct
 	public SelectionValidation isSelectionCorrect(List<URL> selection) {
-		if (selection.size() < targetCount) return SelectionValidation.MISSING;
-		if (selection.size() > targetCount) return SelectionValidation.INVALID;
-		
-		if (selection.stream().allMatch(targetCategory::isPhotoCorrect))
-			return SelectionValidation.CORRECT;
+		SelectionValidation state;
 
-		targetCategory = targetCategory.getRandomSubCategory();
-		return SelectionValidation.INVALID;
+		if (selection.stream().allMatch(targetCategory::isPhotoCorrect)) {
+			if (selection.size() == targetCount) state = SelectionValidation.CORRECT;
+			else if (selection.size() < targetCount) state = SelectionValidation.MISSING;
+			else state = SelectionValidation.INVALID;
+		} else {
+			state = SelectionValidation.INVALID;
+		}
+
+		if (state != SelectionValidation.CORRECT) {
+			increaseDifficulty();
+		}
+	
+		return state;
 	}
 	
 	public String currentTargetName() {
 		return targetCategory.name();
+	}
+
+	private void increaseDifficulty() {
+		if (targetCategory.hasSubcategories()) {
+			targetCategory = targetCategory.getRandomSubCategory();
+		} else {
+			capchaSize += 3;
+			targetCategory = allImages.getRandomSubCategory();
+		} 
+
+		if (capchaSize > 21) {
+			capchaSize = 9;
+		}
 	}
 }
