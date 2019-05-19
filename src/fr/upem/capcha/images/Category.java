@@ -22,6 +22,7 @@ import java.net.URISyntaxException;
 public class Category implements Images {
 
   private static final String[] SUPPORTED_FILE_TYPES = {"jpeg", "png", "jpg", "gif"};
+  private static final Random randomizer = new Random(System.currentTimeMillis());
 
   /// @brief Describes the photo category to the user
   private final String name;
@@ -33,16 +34,13 @@ public class Category implements Images {
   /// photos.
   private final List<URL> photos;
 
+
   /**
    * @brief getter on a random first-level sub-category
    * @return returns a randomly choozen sub-category
    */
   public Category getRandomSubCategory() {
     if (subcategories.isEmpty()) return null;
-
-    var randomizer = new Random();
-    randomizer.setSeed(System.currentTimeMillis());
-
     return subcategories.get(randomizer.nextInt(subcategories.size()));
   }
 
@@ -69,9 +67,6 @@ public class Category implements Images {
     assert count > 0 ;
   
     var allPhotos = getPhotos();
-
-    var randomizer = new Random();
-    randomizer.setSeed(System.currentTimeMillis());
 
     return randomizer
       .ints(count, 0, allPhotos.size()) // TODO risk of dupicates
@@ -197,7 +192,7 @@ public class Category implements Images {
   
   static final Path getClassDirectoryPath(){
 	  	try { 
-	      return Path.of(Category.class.getResource("Category.class").toURI()).getParent();
+	      return Path.of(Category.class.getResource("assets").toURI());
 	    } catch(URISyntaxException error) {
 	      return null;
 	    }
