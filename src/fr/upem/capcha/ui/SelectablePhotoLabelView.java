@@ -17,10 +17,13 @@ import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 
 class SelectablePhotoLabelView extends JLabel {
-  private static final long serialVersionUID = 1L;
+  
   private boolean selected = false;
   final private URL photoLocation;
 
+  private static final long serialVersionUID = 1L;
+
+  /// @constructor
   public SelectablePhotoLabelView(URL location) throws IOException {
     super();
     this.photoLocation = location;
@@ -39,21 +42,34 @@ class SelectablePhotoLabelView extends JLabel {
     setMouseListeners();
   }
 
+  // GETTERS
   public boolean isSelected() {
     return selected;
-  }
-
-  private void toggle() {
-    selected = !selected;
   }
 
   public URL photo() {
     return photoLocation;
   }
 
+
+  // PRIVATE
+
+  private void toggle() {
+    selected = !selected;
+  }
+
   private void setMouseListeners() {
     addMouseListener(new MouseListener() { //Ajouter le listener d'évenement de souris
-			private boolean selected = false;
+      @Override
+      public void mouseClicked(MouseEvent arg0) { //ce qui nous intéresse c'est lorsqu'on clique sur une image, il y a donc des choses à faire ici
+        EventQueue.invokeLater(new Runnable() { 
+          @Override
+          public void run() {
+            toggle();
+            setBorder(isSelected() ? BorderFactory.createLineBorder(Color.RED, 3) : BorderFactory.createEmptyBorder());
+          }
+        });
+      }
 			
       @Override
       public void mouseReleased(MouseEvent arg0) {}
@@ -66,24 +82,6 @@ class SelectablePhotoLabelView extends JLabel {
       
       @Override
       public void mouseEntered(MouseEvent arg0) {}
-    
-      @Override
-      public void mouseClicked(MouseEvent arg0) { //ce qui nous intéresse c'est lorsqu'on clique sur une image, il y a donc des choses à faire ici
-        EventQueue.invokeLater(new Runnable() { 
-          
-          @Override
-          public void run() {
-            toggle();
-            System.out.println(isSelected());
-            if(isSelected()){
-              setBorder(BorderFactory.createLineBorder(Color.RED, 3));
-            }
-            else {
-              setBorder(BorderFactory.createEmptyBorder());
-            }
-          }
-        });
-      }
     });
   }
 }

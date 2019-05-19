@@ -4,16 +4,20 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.function.Consumer;
 
 import fr.upem.capcha.images.Category;
 
 //model class: sends a batch of correct and incorrect images to the controller
 
 public class ImagesProvider {
+
+	public enum SelectionValidation {
+		CORRECT, INVALID, MISSING
+	}
 	
 	private final Category allImages; //all existing images
 	private Category targetCategory; //the category the user has to select the images of
+	private int targetCount;
 	
 
 	public ImagesProvider() {
@@ -29,7 +33,7 @@ public class ImagesProvider {
 		randomizer.setSeed(System.currentTimeMillis());
 		
 		var batch = new ArrayList<URL>(size);
-		var targetCount = randomizer.nextInt(maxTargetPhotosCount - 1) + 1;
+		targetCount = randomizer.nextInt(maxTargetPhotosCount - 1) + 1;
 		
 		batch.addAll(targetCategory.getRandomPhotosURL(targetCount));	
 		
@@ -42,15 +46,15 @@ public class ImagesProvider {
 		return batch;
 	}
 	//checks if all the images in the selection are correct
-	public boolean isSelectionCorrect(List<URL> selection, Consumer<String> ifFailed) {
-		for (URL image: selection) {
-			if(!targetCategory.isPhotoCorrect(image)) {
-				targetCategory = targetCategory.getRandomSubCategory();
-				ifFailed.accept("Au moins une photo était incorrecte.");
-				return false;
-			}
-		}
-		return true;
+	public SelectionValidation isSelectionCorrect(List<URL> selection) {
+		if (selection.size() < targetCount) return SelectionValidation.MISSING;
+		if (selection.size() > targetCount) return SelectionValidation.INVALID;
+		
+		if (selection.stream().allMatch(targetCategory::isPhotoCorrect))
+			return SelectionValidation.CORRECT;
+
+		targetCategory = targetCategory.getRandomSubCategory();
+		return SelectionValidation.INVALID;
 	}
 	
 	public String currentTargetName() {

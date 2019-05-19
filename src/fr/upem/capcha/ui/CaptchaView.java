@@ -15,52 +15,54 @@ import javax.swing.JTextArea;
 
 interface CaptchaViewDelegate {
   public void captchaUISubmitPhotosAction(List<URL> photos);
+  public void captchaUIAbortAction();
   public List<URL> capchaUIDisplayedPhotos();
 }
 
-public class CaptchaView {
-  private JFrame frame;
+public class CaptchaView extends JFrame {
+  private static final long serialVersionUID = 1L;
   private JTextArea message;
   private CaptchaViewDelegate delegate;
   private SelectablePhotoGridView selectionGrid;
 
   public CaptchaView(CaptchaViewDelegate delegate) {
-    frame = new JFrame("captcha");
+    super("captcha");
 
-    frame.setSize(1024, 768);
-    frame.setResizable(false); 
-    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    frame.setLayout(new GridLayout(3, 1));
+    setSize(1024, 768);
+    setResizable(false); 
+    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    setLayout(new GridLayout(4, 1));
 
     message = new JTextArea("Cliquez n'importe où ... juste pour tester l'interface !");
-    frame.add(message);
-    frame.add(createOkButton());
-    frame.setVisible(true);
+    add(message);
+    add(createAbortButton());
+    add(createOkButton());
+    setVisible(true);
   }
 
   public void updatePhotos() {
     if(selectionGrid != null) {
-      frame.invalidate();
-      frame.remove(selectionGrid);
+      invalidate();
+      remove(selectionGrid);
     }
      
     var capchaPhotos = delegate.capchaUIDisplayedPhotos();
     selectionGrid = new SelectablePhotoGridView(capchaPhotos);
 
-    frame.add(selectionGrid, 0);
-    frame.revalidate();
-    frame.repaint();
+    add(selectionGrid, 0);
+    revalidate();
+    repaint();
   }
 
   public void setMessage(String text) {
-    frame.invalidate();
-    frame.remove(message);
+    invalidate();
+    remove(message);
 
     message = new JTextArea(text);
 
-    frame.add(message, 1);
-    frame.revalidate();
-    frame.repaint();
+    add(message, 1);
+    revalidate();
+    repaint();
   }
 
   private JButton createOkButton(){
@@ -69,6 +71,16 @@ public class CaptchaView {
       @Override
 			public void actionPerformed(ActionEvent arg0) {
 				EventQueue.invokeLater(() -> delegate.captchaUISubmitPhotosAction(selectionGrid.selected()));
+			}
+		});
+  }
+
+  private JButton createAbortButton(){
+		return new JButton(new AbstractAction("Annuler") { //ajouter l'action du bouton
+			private static final long serialVersionUID = 1L;
+      @Override
+			public void actionPerformed(ActionEvent arg0) {
+				EventQueue.invokeLater(delegate::captchaUIAbortAction);
 			}
 		});
   }
