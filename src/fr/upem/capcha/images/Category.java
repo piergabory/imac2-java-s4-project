@@ -38,8 +38,7 @@ public class Category implements Images {
    * @return returns a randomly choozen sub-category
    */
   public Category getRandomSubCategory() {
-    if (subcategories.isEmpty())
-      return null;
+    if (subcategories.isEmpty()) return null;
 
     // initialize randomizer
     // set the seed to the UNIX timestamp
@@ -149,8 +148,6 @@ public class Category implements Images {
     subcategories = createCategoriesFromDirectoryEntries(entries);
     photos = createImageListFromDirectoryEntries(entries);
 
-    // TODO: If photo is empty, throw an error.
-
     // sets the category name as the directory name.
     name = directoryPath.getFileName().toString();
   }  
@@ -189,7 +186,6 @@ public class Category implements Images {
    */
   private static List<URL> createImageListFromDirectoryEntries(List<File> entries) {
     // filters the images out of the directories
-    // TODO: Filter out class files
     return entries.stream()
       .filter(File::isFile)
       .filter(
@@ -206,6 +202,7 @@ public class Category implements Images {
           return null;
         }
       })
+      
       .filter(Objects::nonNull)
       .collect(Collectors.toList());
   }

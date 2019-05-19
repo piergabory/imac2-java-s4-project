@@ -23,8 +23,7 @@ public class ImagesProvider {
 	
 		//returns a list of correct and incorrect images
 	public List<URL> getPhotoTestBatch(int size, int maxTargetPhotosCount) {
-		
-		// TODO throw err if size < maxTarget
+		assert size < maxTargetPhotosCount;
 		
 		var randomizer = new Random();
 		randomizer.setSeed(System.currentTimeMillis());
