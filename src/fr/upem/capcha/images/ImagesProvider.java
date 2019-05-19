@@ -37,7 +37,7 @@ public class ImagesProvider {
 		
 		batch.addAll(targetCategory.getRandomPhotosURL(targetCount));	
 		
-		while(batch.size() <= size) {
+		while(batch.size() < size) {
 			var image = allImages.getRandomPhotoURL();
 			if (targetCategory.isPhotoCorrect(image)) continue;
 			batch.add(image);

@@ -2,9 +2,8 @@ package fr.upem.capcha.ui;
 
 import java.net.URL;
 import java.util.List;
-
+import java.awt.BorderLayout;
 import java.awt.EventQueue;
-import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
@@ -31,13 +30,10 @@ public class CaptchaView extends JFrame {
     setSize(1024, 768);
     setResizable(false); 
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    setLayout(new GridLayout(4, 1));
+    setLayout(new BorderLayout());
 
-    message = new JTextArea("Cliquez n'importe où ... juste pour tester l'interface !");
-    add(message);
-    add(createAbortButton());
-    add(createOkButton());
-    setVisible(true);
+    add(createAbortButton(), BorderLayout.WEST);
+    add(createOkButton(), BorderLayout.EAST);
   }
 
   public void updatePhotos() {
@@ -49,18 +45,20 @@ public class CaptchaView extends JFrame {
     var capchaPhotos = delegate.capchaUIDisplayedPhotos();
     selectionGrid = new SelectablePhotoGridView(capchaPhotos);
 
-    add(selectionGrid, 0);
+    add(selectionGrid, BorderLayout.CENTER);
     revalidate();
     repaint();
   }
 
   public void setMessage(String text) {
-    invalidate();
-    remove(message);
+    if(message != null) {
+      invalidate();
+      remove(message);
+    }
 
     message = new JTextArea(text);
 
-    add(message, 1);
+    add(message, BorderLayout.NORTH);
     revalidate();
     repaint();
   }

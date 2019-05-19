@@ -17,7 +17,9 @@ public class CaptchaViewController implements CaptchaViewDelegate {
 
   public CaptchaViewController() {
     captchaView.setDelegate(this);
+    setPhotoKindIndicatorMessage();
     captchaView.updatePhotos();
+    captchaView.setVisible(true);
   }
 
   @Override
@@ -26,8 +28,10 @@ public class CaptchaViewController implements CaptchaViewDelegate {
     switch (provider.isSelectionCorrect(photos)) {
       case MISSING:
       message = "Vous avez oublié une photo";
+
       case INVALID:
       captchaView.setMessage("Cliquez sur les images contenant des " + provider.currentTargetName());
+      setPhotoKindIndicatorMessage();
       captchaView.updatePhotos();
       break;
 
@@ -59,5 +63,9 @@ public class CaptchaViewController implements CaptchaViewDelegate {
   public CaptchaViewController cancel(Runnable onCancel) {
     cancelHandler = onCancel;
     return this;
+  }
+
+  private void setPhotoKindIndicatorMessage() {
+    captchaView.setMessage("Cliquez sur les images contenant des " + provider.currentTargetName());
   }
 }
