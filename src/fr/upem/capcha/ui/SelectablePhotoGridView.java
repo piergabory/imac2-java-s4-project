@@ -22,7 +22,7 @@ class SelectablePhotoGridView extends JPanel {
     super();
 
     int rowsCount = photos.size() / COLUMNS_COUNT + 1;
-    setLayout(new GridLayout(COLUMNS_COUNT, rowsCount));
+    setLayout(new GridLayout(rowsCount, COLUMNS_COUNT));
     
     for (URL location : photos) {
       try {

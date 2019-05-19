@@ -8,11 +8,11 @@ import fr.upem.capcha.images.ImagesProvider;
 public class CaptchaViewController implements CaptchaViewDelegate {
 
   private ImagesProvider provider = new ImagesProvider();
-  private CaptchaView captchaView = new CaptchaView();
+  private CaptchaView captchaView = new CaptchaView(this);
 
   public CaptchaViewController() {
     captchaView.setDelegate(this);
-    captchaView.draw();
+    captchaView.updatePhotos();
   }
 
   @Override

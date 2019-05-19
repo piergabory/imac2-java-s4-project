@@ -1,8 +1,6 @@
 package fr.upem.capcha.images;
 
 import java.util.List;
-
-//interface : represents an image within the filesystem
 import java.net.URL;
 
 public interface Images {

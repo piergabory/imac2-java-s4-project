@@ -40,8 +40,6 @@ public class Category implements Images {
   public Category getRandomSubCategory() {
     if (subcategories.isEmpty()) return null;
 
-    // initialize randomizer
-    // set the seed to the UNIX timestamp
     var randomizer = new Random();
     randomizer.setSeed(System.currentTimeMillis());
 
@@ -70,20 +68,14 @@ public class Category implements Images {
   public List<URL> getRandomPhotosURL(int count) {
     assert count > 0 ;
   
-    // get all the category photos
     var allPhotos = getPhotos();
 
-    // initialize randomizer
-    // set the seed to the UNIX timestamp
     var randomizer = new Random();
     randomizer.setSeed(System.currentTimeMillis());
 
     return randomizer
-      // Creates a stream of count random indexes of the allPhoto list
       .ints(count, 0, allPhotos.size()) // TODO risk of dupicates
-      // maps each index to a photo, creating a stream of random photos
       .mapToObj(allPhotos::get)
-      // collects the stream into a List type
       .collect(Collectors.toList());
   }
 
@@ -138,17 +130,14 @@ public class Category implements Images {
    * @param directoryPath target directory
    */
   public Category(Path directoryPath) throws IOException{
-    // stores all the entries in the directory (subs and images)
     List<File> entries;
 
     // Tries to load the entries. If fails the directoryPath is probably invalid.
     entries = Files.list(directoryPath).map(Path::toFile).collect(Collectors.toList());
 
-    // set class properties
     subcategories = createCategoriesFromDirectoryEntries(entries);
     photos = createImageListFromDirectoryEntries(entries);
 
-    // sets the category name as the directory name.
     name = directoryPath.getFileName().toString();
   }  
 
@@ -185,7 +174,6 @@ public class Category implements Images {
    * coded in declarative style programming
    */
   private static List<URL> createImageListFromDirectoryEntries(List<File> entries) {
-    // filters the images out of the directories
     return entries.stream()
       .filter(File::isFile)
       .filter(

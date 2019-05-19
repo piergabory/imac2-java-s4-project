@@ -21,7 +21,7 @@ public class ImagesProvider {
 		targetCategory = allImages.getRandomSubCategory();
 	}
 	
-		//returns a list of correct and incorrect images
+	//returns a list of correct and incorrect images
 	public List<URL> getPhotoTestBatch(int size, int maxTargetPhotosCount) {
 		assert size < maxTargetPhotosCount;
 		
@@ -41,7 +41,7 @@ public class ImagesProvider {
 		
 		return batch;
 	}
-		//checks if all the images in the selection are correct
+	//checks if all the images in the selection are correct
 	public boolean isSelectionCorrect(List<URL> selection, Consumer<String> ifFailed) {
 		for (URL image: selection) {
 			if(!targetCategory.isPhotoCorrect(image)) {
