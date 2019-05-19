@@ -18,7 +18,7 @@ import java.awt.image.BufferedImage;
 
 class SelectablePhotoLabelView extends JLabel {
   private static final long serialVersionUID = 1L;
-  private boolean isSelected = false;
+  private boolean selected = false;
   final private URL photoLocation;
 
   public SelectablePhotoLabelView(URL location) throws IOException {
@@ -40,7 +40,11 @@ class SelectablePhotoLabelView extends JLabel {
   }
 
   public boolean isSelected() {
-    return isSelected;
+    return selected;
+  }
+
+  private void toggle() {
+    selected = !selected;
   }
 
   public URL photo() {
@@ -49,7 +53,7 @@ class SelectablePhotoLabelView extends JLabel {
 
   private void setMouseListeners() {
     addMouseListener(new MouseListener() { //Ajouter le listener d'évenement de souris
-			private boolean isSelected = false;
+			private boolean selected = false;
 			
       @Override
       public void mouseReleased(MouseEvent arg0) {}
@@ -69,13 +73,13 @@ class SelectablePhotoLabelView extends JLabel {
           
           @Override
           public void run() {
-            if(!isSelected){
+            toggle();
+            System.out.println(isSelected());
+            if(isSelected()){
               setBorder(BorderFactory.createLineBorder(Color.RED, 3));
-              isSelected = true;
             }
             else {
               setBorder(BorderFactory.createEmptyBorder());
-              isSelected = false;
             }
           }
         });

@@ -35,9 +35,13 @@ class SelectablePhotoGridView extends JPanel {
 
   public List<URL> selected() {
     return 
-      Stream.of((SelectablePhotoLabelView[]) getComponents())
+      Stream.of(getComponents())
+      .filter(SelectablePhotoLabelView.class::isInstance)
+      .map(SelectablePhotoLabelView.class::cast)
+
       .filter(SelectablePhotoLabelView::isSelected)
       .map(SelectablePhotoLabelView::photo)
+      
       .collect(Collectors.toList());
   }
 }
