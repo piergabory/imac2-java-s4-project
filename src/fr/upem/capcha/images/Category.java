@@ -53,9 +53,7 @@ public class Category implements Images {
    */
   public List<URL> getPhotos() {
     return subcategories.stream()
-      // gather all the subcategory photos in an list of lists (for each category).
       .map(subcategory -> subcategory.getPhotos().stream())
-      // combine the lists into the root image list.
       .reduce(photos.stream(), Stream::concat)
       .collect(Collectors.toList());
   }
