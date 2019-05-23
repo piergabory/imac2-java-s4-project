@@ -1,24 +1,23 @@
+/** 
+ * @author Pierre Gabory
+ * @author Solane Genevaux
+ */
 package fr.upem.capcha.images;
-
 import java.util.List;                    // data structure used for the properties
 import java.util.stream.Stream;           // used for mapping, reducing and other functional programming techniques
 import java.util.stream.Collectors;       // used to convert back Streams into Lists
 import java.nio.file.Path;                // used to locate Category directories
 import java.nio.file.Files;               // used to read the category Directory
 import java.io.File;                      // used to filter subdirectories and files
+import java.net.URL;                      // used to represent Photos
+import java.util.Random;                  // used to generate random indexes for the random image getter
+import java.util.Objects;                 // used to check for failed URL to URI conversions
+import java.net.MalformedURLException;    // thrown on failed URI to URL conversion
 import java.io.IOException;
-import java.net.URL; // used to represent Photos
-import java.util.Random; // used to generate random indexes for the random image getter
-import java.util.Objects; // used to check for failed URL to URI conversions
-import java.net.MalformedURLException; // thrown on failed URI to URL conversion
-import java.net.URISyntaxException;
 
 /**
- * @class Category
- * @brief Provides images sorted in a category tree
+ * Provides images sorted in a category tree
  */
-
-// represents a more or less precise category of image
 public class Category implements Images {
 
   private static final String PHOTOS_ROOT_DIRECTORY = "assets";
@@ -26,19 +25,12 @@ public class Category implements Images {
 
   private static final Random randomizer = new Random(System.currentTimeMillis());
 
-  /// @brief Describes the photo category to the user
   private final String name;
-
-  /// @brief Lists subcategories of the category
-  private final List<Category> subcategories;
-
-  /// @brief photos at the top of the category tree. excludes all sub categories
-  /// photos.
-  private final List<URL> photos;
-
+  private final List<Category> subcategories;   // Describes the photo category to the user
+  private final List<URL> photos;               // photos at the top of the category tree. excludes all sub categories
 
   /**
-   * @brief getter on a random first-level sub-category
+   * getter on a random first-level sub-category
    * @return returns a randomly choozen sub-category
    */
   public Category getRandomSubCategory() {
@@ -47,8 +39,7 @@ public class Category implements Images {
   }
 
   /**
-   * @brief recursively gathers all the photos in the category and its
-   *        subcategories
+   * recursively gathers all the photos in the category and its subcategories
    * @return collection of URLs
    */
   public List<URL> getPhotos() {
@@ -59,7 +50,7 @@ public class Category implements Images {
   }
 
   /**
-   * @brief selects a random sample of all the photos in the category.
+   * selects a random sample of all the photos in the category.
    * @param count size of the returned sample
    * @return random subset of all the photos URLs.
    */
@@ -75,7 +66,7 @@ public class Category implements Images {
   }
 
   /**
-   * @brief alias of getRandomPhotosURL for a single photo
+   * alias of getRandomPhotosURL for a single photo
    * @return a single photo URL
    */
   public URL getRandomPhotoURL() {
@@ -83,8 +74,7 @@ public class Category implements Images {
   }
 
   /**
-   * @brief checks recursively if URL points to a photo member of the category or
-   *        its subcategories
+   * checks recursively if URL points to a photo member of the category or its subcategories
    * @param photo needle URL searched in all photo
    * @return boolean, true if the URL is a member of the category
    */
@@ -93,25 +83,9 @@ public class Category implements Images {
   }
 
   /**
-   * @brief category name getter.
-   * @return name property
+   * Creates a tree containing all the photos available.
+   * @return Global category getter
    */
-  public String name() {
-    return name;
-  }
-
-  public boolean hasSubcategories() {
-    return !subcategories.isEmpty();
-  }
-
-  private boolean isEmpty() {
-    return photos.isEmpty() && subcategories.isEmpty();
-  }
-
-  private boolean notEmpty() {
-    return !isEmpty();
-  }
-
   public static Category getAll() {
     try {
       var path = getClassDirectoryPath();
@@ -123,9 +97,7 @@ public class Category implements Images {
   }
 
   /**
-   * @constructor Category
-   * @brief scans through a directory on the disk to construct the photo
-   *        categories tree
+   * Scans through a directory on the disk to construct the photo  categories tree
    * @param directoryPath target directory
    */
   public Category(Path directoryPath) throws IOException{
@@ -141,12 +113,13 @@ public class Category implements Images {
   }  
 
   /**
-   * @brief static private, constructor helper method extracting subcategories from a stream of files.
-   * @param entries stream of Files object to parse
-   * @return List of categoriess
-   * 
+   * Helper method extracting subcategories from a stream of files.
+   * <p>
    * the category constructor is called for each direcotry, building the tree recursively.
    * coded in declarative style programming
+   * 
+   * @param entries stream of Files object to parse
+   * @return List of categoriess
    */
   private static List<Category> createCategoriesFromDirectoryEntries(List<File> entries) {
     return entries.stream()
@@ -165,12 +138,13 @@ public class Category implements Images {
   }
 
   /**
-   * @brief static private, helper method extracting images in a stream of files
-   * @param entries stream of Files object to parse
-   * @return List of URL photos
-   * 
+   * Helper method extracting images in a stream of files
+   * <p>
    * Only files at the root of the target directory are scanned.
    * coded in declarative style programming
+   *
+   * @param entries stream of Files object to parse
+   * @return List of URL photos
    */
   private static List<URL> createImageListFromDirectoryEntries(List<File> entries) {
     return entries.stream()
@@ -194,12 +168,36 @@ public class Category implements Images {
       .collect(Collectors.toList());
   }
   
-  static final Path getClassDirectoryPath(){
+  /**
+   * Helper method providing the path to the global root photo directory
+   * @return photo directory path
+   */
+  private static final Path getClassDirectoryPath(){
+	  	var directoryURL = Category.class.getResource(PHOTOS_ROOT_DIRECTORY);
 	  	try { 
-	      return Path.of(Category.class.getResource(PHOTOS_ROOT_DIRECTORY).toURI());
-	    } catch(URISyntaxException error) {
+	      return Path.of(directoryURL.toURI());
+	    } catch(Exception error) {
+	    	System.out.println(error.getLocalizedMessage());
 	      return null;
 	    }
+  }
+
+  // Getters
+
+  public String name() {
+    return name;
+  }
+
+  public boolean hasSubcategories() {
+    return !subcategories.isEmpty();
+  }
+
+  private boolean isEmpty() {
+    return photos.isEmpty() && subcategories.isEmpty();
+  }
+
+  private boolean notEmpty() {
+    return !isEmpty();
   }
 
 }
