@@ -3,14 +3,14 @@
  * @author Solane Genevaux
  */
 package fr.upem.capcha.images;
-import java.util.List;                    // data structure used for the properties
-import java.util.stream.Stream;           // used for mapping, reducing and other functional programming techniques
-import java.util.stream.Collectors;       // used to convert back Streams into Lists
-import java.nio.file.Path;                // used to locate Category directories
-import java.nio.file.Files;               // used to read the category Directory
-import java.io.File;                      // used to filter subdirectories and files
-import java.net.URL;                      // used to represent Photos
-import java.util.Random;                  // used to generate random indexes for the random image getter
+
+import java.util.List; // data structure used for the properties
+import java.util.stream.Stream; // used for mapping, reducing and other functional programming techniques;
+import java.util.stream.Collectors; // used to convert back Streams into Lists
+import java.io.File; // used to filter subdirectories and files
+import java.net.URL; // used to represent Photos
+import java.util.Random; // used to generate random indexes for the random image getter
+import java.util.jar.JarFile;
 import java.util.Objects;                 // used to check for failed URL to URI conversions
 import java.net.MalformedURLException;    // thrown on failed URI to URL conversion
 import java.io.IOException;
@@ -21,7 +21,7 @@ import java.io.IOException;
 public class Category implements Images {
 
   private static final String PHOTOS_ROOT_DIRECTORY = "assets";
-  private static final String[] SUPPORTED_FILE_TYPES = {"jpeg", "png", "jpg", "gif"};
+  private static final String[] SUPPORTED_FILE_TYPES = {"jpeg", "png", "jpg", "gif"}; // not case sensitive
 
   private static final Random randomizer = new Random(System.currentTimeMillis());
 
@@ -51,6 +51,12 @@ public class Category implements Images {
 
   /**
    * selects a random sample of all the photos in the category.
+   * <p>
+   * Photos might apprear twice.
+   * We left it this way in case the photo directory doesn't have enough different photos to return.
+   * There are solution to allow duplicates only when necessary, but we prefer to keep the code simple. (TODO: Possible future improvement)
+   * As long as there isn't less than 3 to 5 photos per directory, this souldn't affect the user experience.
+   * 
    * @param count size of the returned sample
    * @return random subset of all the photos URLs.
    */
@@ -60,7 +66,7 @@ public class Category implements Images {
     var allPhotos = getPhotos();
 
     return randomizer
-      .ints(count, 0, allPhotos.size()) // TODO risk of dupicates
+      .ints(count, 0, allPhotos.size())
       .mapToObj(allPhotos::get)
       .collect(Collectors.toList());
   }
@@ -92,6 +98,7 @@ public class Category implements Images {
       return new Category(path);
     } catch(IOException exception) {
       System.err.println("Failed to access picture directory");
+      exception.printStackTrace();
       return null;
     }
   }
@@ -100,16 +107,17 @@ public class Category implements Images {
    * Scans through a directory on the disk to construct the photo  categories tree
    * @param directoryPath target directory
    */
-  public Category(Path directoryPath) throws IOException{
-    List<File> entries;
+  public Category(File directoryPath) throws IOException, NullPointerException {
+    File[] entriesArray = directoryPath.listFiles();
 
+    if (entriesArray == null) { throw new IOException("Invalid Directory Path -> " + directoryPath.toString()); }
+    if (entriesArray.length == 0) { throw new IOException("Empty directory ->" + directoryPath.toString()); }
+
+    List<File> entries = List.of(entriesArray);
     // Tries to load the entries. If fails the directoryPath is probably invalid.
-    entries = Files.list(directoryPath).map(Path::toFile).collect(Collectors.toList());
-
     subcategories = createCategoriesFromDirectoryEntries(entries);
     photos = createImageListFromDirectoryEntries(entries);
-
-    name = directoryPath.getFileName().toString();
+    name = directoryPath.getName();
   }  
 
   /**
@@ -124,11 +132,12 @@ public class Category implements Images {
   private static List<Category> createCategoriesFromDirectoryEntries(List<File> entries) {
     return entries.stream()
       .filter(File::isDirectory)
-      .map(File::toPath)
       .map(path -> {
+        System.out.println(path.toString());
         try {
           return new Category(path);
-        } catch(IOException exception) {
+        } catch(Exception exception) {
+          System.out.println(exception.getMessage());
           return null;
         }
       })
@@ -150,7 +159,9 @@ public class Category implements Images {
     return entries.stream()
       .filter(File::isFile)
       .filter(
-        file -> Stream.of(SUPPORTED_FILE_TYPES).anyMatch(
+        file -> Stream.of(SUPPORTED_FILE_TYPES)
+        .map(String::toLowerCase)
+        .anyMatch(
           suffix -> file.getName().toLowerCase().endsWith(suffix)
         )
       )
@@ -159,7 +170,7 @@ public class Category implements Images {
         try { 
           return URI.toURL();
         } catch(MalformedURLException exception) {
-          System.err.println(exception.getLocalizedMessage());
+          System.err.println(exception.getMessage());
           return null;
         }
       })
@@ -172,18 +183,25 @@ public class Category implements Images {
    * Helper method providing the path to the global root photo directory
    * @return photo directory path
    */
-  private static final Path getClassDirectoryPath(){
-	  	var directoryURL = Category.class.getResource(PHOTOS_ROOT_DIRECTORY);
-	  	try { 
-	      return Path.of(directoryURL.toURI());
-	    } catch(Exception error) {
-	    	System.out.println(error.getLocalizedMessage());
-	      return null;
-	    }
+  private static final File getClassDirectoryPath(){
+    try { 
+      var directoryURL = Category.class.getResource(PHOTOS_ROOT_DIRECTORY);
+      var direcotryURI = directoryURL.toURI();
+      
+      // if(directoryURL.getProtocol() == "jar" && direcotryURI.toString().contains("!")) {
+        // var jarFileDirectory = new JarFile(direcotryURI.toString());
+        
+      // } else {
+        return new File(direcotryURI);
+      // }
+    } catch (Exception exception) {
+      exception.printStackTrace();
+      System.out.println(exception.getMessage());
+      return null;
+    }
   }
-
+  
   // Getters
-
   public String name() {
     return name;
   }

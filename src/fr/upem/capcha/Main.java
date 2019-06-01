@@ -10,6 +10,7 @@ import fr.upem.capcha.ui.CapchaViewController;
  */
 public class Main {
   public static void main(String[] args) {
+    System.out.println("hello world!");
     (new CapchaViewController())
       .then(() -> System.out.println("The user is probably human"))
       .cancel(() -> System.out.println("The user aborted the action"));
