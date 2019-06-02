@@ -3,6 +3,7 @@
  * @author Solane Genevaux
  */
 package fr.upem.capcha.images;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,8 +47,8 @@ public class ImagesProvider {
 	 * Scans through the asset directory for all the photos.
 	 * Selects a random subcategory for the target set.
 	 */
-	public ImagesProvider() {
-		allImages = Category.getAll();
+	public ImagesProvider(String imageLibraryPathName) throws IOException {
+		allImages = new Category(imageLibraryPathName);
 		targetCategory = allImages.getRandomSubCategory();
 	}
 	

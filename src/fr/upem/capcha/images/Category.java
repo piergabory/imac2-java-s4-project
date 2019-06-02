@@ -10,7 +10,6 @@ import java.util.stream.Collectors; // used to convert back Streams into Lists
 import java.io.File; // used to filter subdirectories and files
 import java.net.URL; // used to represent Photos
 import java.util.Random; // used to generate random indexes for the random image getter
-import java.util.jar.JarFile;
 import java.util.Objects;                 // used to check for failed URL to URI conversions
 import java.net.MalformedURLException;    // thrown on failed URI to URL conversion
 import java.io.IOException;
@@ -20,7 +19,7 @@ import java.io.IOException;
  */
 public class Category implements Images {
 
-  private static final String PHOTOS_ROOT_DIRECTORY = "assets";
+  private static final String DEFAULT_PHOTOS_ROOT_DIRECTORY = "./assets";
   private static final String[] SUPPORTED_FILE_TYPES = {"jpeg", "png", "jpg", "gif"}; // not case sensitive
 
   private static final Random randomizer = new Random(System.currentTimeMillis());
@@ -92,15 +91,8 @@ public class Category implements Images {
    * Creates a tree containing all the photos available.
    * @return Global category getter
    */
-  public static Category getAll() {
-    try {
-      var path = getClassDirectoryPath();
-      return new Category(path);
-    } catch(IOException exception) {
-      System.err.println("Failed to access picture directory");
-      exception.printStackTrace();
-      return null;
-    }
+  public Category(String photoDirectory) throws IOException {
+    this(new File(Objects.requireNonNullElse(photoDirectory, DEFAULT_PHOTOS_ROOT_DIRECTORY)));
   }
 
   /**
@@ -110,8 +102,13 @@ public class Category implements Images {
   public Category(File directoryPath) throws IOException, NullPointerException {
     File[] entriesArray = directoryPath.listFiles();
 
-    if (entriesArray == null) { throw new IOException("Invalid Directory Path -> " + directoryPath.toString()); }
-    if (entriesArray.length == 0) { throw new IOException("Empty directory ->" + directoryPath.toString()); }
+    if (entriesArray == null) { 
+      throw new IOException("Invalid Photo Directory Path -> " + directoryPath.toString() + "\nMake sure to provide a pathname to an existing directory containing supported image files."); 
+    }
+
+    if (entriesArray.length == 0) { 
+      throw new IOException("Empty directory ->" + directoryPath.toString()); 
+    }
 
     List<File> entries = List.of(entriesArray);
     // Tries to load the entries. If fails the directoryPath is probably invalid.
@@ -177,28 +174,6 @@ public class Category implements Images {
       
       .filter(Objects::nonNull)
       .collect(Collectors.toList());
-  }
-  
-  /**
-   * Helper method providing the path to the global root photo directory
-   * @return photo directory path
-   */
-  private static final File getClassDirectoryPath(){
-    try { 
-      var directoryURL = Category.class.getResource(PHOTOS_ROOT_DIRECTORY);
-      var direcotryURI = directoryURL.toURI();
-      
-      // if(directoryURL.getProtocol() == "jar" && direcotryURI.toString().contains("!")) {
-        // var jarFileDirectory = new JarFile(direcotryURI.toString());
-        
-      // } else {
-        return new File(direcotryURI);
-      // }
-    } catch (Exception exception) {
-      exception.printStackTrace();
-      System.out.println(exception.getMessage());
-      return null;
-    }
   }
   
   // Getters

@@ -3,6 +3,7 @@
  * @author Solane Genevaux
  */
 package fr.upem.capcha.ui;
+import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import javax.swing.JOptionPane;
@@ -20,7 +21,7 @@ public class CapchaViewController implements CapchaViewDelegate {
   static private final String SUCCESS_DIALOG_MESSAGE = "Bravo!";
 
   // model view
-  private final ImagesProvider provider = new ImagesProvider();
+  private final ImagesProvider provider;
   private final CapchaView capchaView = new CapchaView(this);
 
   // capcha completion callbacks
@@ -32,7 +33,9 @@ public class CapchaViewController implements CapchaViewDelegate {
    * Sets parameters on the view.
    * Displays the view when ready.
    */
-  public CapchaViewController() {
+  public CapchaViewController(String imageLibraryPathName) throws IOException {
+    provider = new ImagesProvider(imageLibraryPathName);
+    
     setPhotoKindIndicatorMessage();
     capchaView.updatePhotos();
     capchaView.setVisible(true);

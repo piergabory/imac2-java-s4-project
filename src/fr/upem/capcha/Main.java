@@ -10,9 +10,20 @@ import fr.upem.capcha.ui.CapchaViewController;
  */
 public class Main {
   public static void main(String[] args) {
-    System.out.println("hello world!");
-    (new CapchaViewController())
-      .then(() -> System.out.println("The user is probably human"))
-      .cancel(() -> System.out.println("The user aborted the action"));
+    try {
+      new CapchaViewController(args.length == 1 ? args[0] : "./assets")
+        .then(() -> { 
+          System.out.println("SUCCESS");
+          System.exit(0);
+      })
+        .cancel(() -> {
+          System.out.println("CANCEL");
+          System.exit(1);
+        });
+    } catch(Exception e) {
+      System.out.println("FAILURE");
+      System.err.println(e.getLocalizedMessage());
+      System.exit(2);
+    } 
   }
 }
