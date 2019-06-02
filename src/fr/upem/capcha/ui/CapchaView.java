@@ -31,7 +31,7 @@ public class CapchaView extends JFrame {
 
   /**
    * Capcha View Constructor. Creates and setup the window
-   * @param delegate
+   * @param delegate provides the view images and handlers. should be implemented by a controller
    */
   public CapchaView(CapchaViewDelegate delegate) {
     super(WINDOW_TITLE);

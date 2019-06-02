@@ -46,6 +46,8 @@ public class ImagesProvider {
 	 * Image provider constructor
 	 * Scans through the asset directory for all the photos.
 	 * Selects a random subcategory for the target set.
+	 * @param imageLibraryPathName The string path sent to the Category constructor
+	 * @throws IOException from the category constructor if the path is unreachable
 	 */
 	public ImagesProvider(String imageLibraryPathName) throws IOException {
 		allImages = new Category(imageLibraryPathName);

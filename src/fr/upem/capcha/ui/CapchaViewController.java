@@ -31,7 +31,9 @@ public class CapchaViewController implements CapchaViewDelegate {
   /**
    * Controller constructor.
    * Sets parameters on the view.
-   * Displays the view when ready.
+   * Displays the view when ready
+   * @param imageLibraryPathName. Path the the photo library: source for the capcha. 
+   * @throws IOException when libraryPathName is unreachable
    */
   public CapchaViewController(String imageLibraryPathName) throws IOException {
     provider = new ImagesProvider(imageLibraryPathName);
@@ -106,7 +108,7 @@ public class CapchaViewController implements CapchaViewDelegate {
 
   /**
    * Cancel Callback Setter (Builder)
-   * @param onSuccess cancel callback called on the user completion of the capcha
+   * @param onCancel cancel callback called on the user completion of the capcha
    * @return the viewController as Builder functions do.
    */
   public CapchaViewController cancel(Runnable onCancel) {

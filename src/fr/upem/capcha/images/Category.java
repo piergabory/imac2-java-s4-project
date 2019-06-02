@@ -89,7 +89,8 @@ public class Category implements Images {
 
   /**
    * Creates a tree containing all the photos available.
-   * @return Global category getter
+   * @param photoDirectory string path to the photo library
+   * @throws IOException if the path is unreachable
    */
   public Category(String photoDirectory) throws IOException {
     this(new File(Objects.requireNonNullElse(photoDirectory, DEFAULT_PHOTOS_ROOT_DIRECTORY)));
@@ -98,8 +99,10 @@ public class Category implements Images {
   /**
    * Scans through a directory on the disk to construct the photo  categories tree
    * @param directoryPath target directory
+   * @throws IOException if the path is unreachable
+   * @throws NullPointerException ?
    */
-  public Category(File directoryPath) throws IOException, NullPointerException {
+  private Category(File directoryPath) throws IOException, NullPointerException {
     File[] entriesArray = directoryPath.listFiles();
 
     if (entriesArray == null) { 
