@@ -2,6 +2,8 @@
 
 Solane Genevaux & Pierre Gabory
 
+![Screenshot](Screenshot.png)
+
 ## Utilisation
 
 ### Intégration dans un projet Java
@@ -54,6 +56,7 @@ L’architecture de l’interface utilisateur emprunte largement du modèle des 
 
 ### Schémas UML(-ish)
 
+![UML](uml.png)
 On notera l’utilisation de l’héritage, des interfaces et de toutes les fonctionnalité objet de java. Le projet fait aussi utilisation généreuse de programmation déclarative, à l’aide des streams. Les applications, réductions et filtres permettent un traitement des images minimaliste et facile à maintenir (voir la classe Category).
 
 ### Suite à la soutenance: Introspection, Executables et Parcours Dynamiques
