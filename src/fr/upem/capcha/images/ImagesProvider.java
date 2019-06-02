@@ -31,7 +31,7 @@ public class ImagesProvider {
 	/**
 	 * Image Provider Options
 	 */
-	private static final int MIN_TARGET_RESULTS = 1;					// Minimum amount of photo the user has to select, must be less than the max
+	private static final int MIN_TARGET_RESULTS = 2;					// Minimum amount of photo the user has to select, must be less than the max
 	private static final int MAX_TARGET_RESULTS = 4;					// Maximum amount of photo the user has to select, must be more than the min
 	private static final int DEFAULT_CAPCHA_SIZE = 9;					// Default number of photos in the capcha
 	private static final int MAXIMUM_CAPCHA_SIZE = 21;				// Maximum number of photos allowed in the capchas
@@ -89,8 +89,7 @@ public class ImagesProvider {
 		// the selection is contained in the target set
 		if (selection.stream().allMatch(targetCategory::isPhotoCorrect)) {
 			// the set has missing cards
-			if (selection.size() < targetCount) state = SelectionValidation.MISSING;			
-			 state = SelectionValidation.CORRECT;
+			 state = (selection.size() < targetCount) ? SelectionValidation.MISSING : SelectionValidation.CORRECT;
 		} 
 		
 		// the selection contains cards that are not member of the target set.

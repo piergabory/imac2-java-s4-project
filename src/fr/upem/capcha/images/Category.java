@@ -7,7 +7,7 @@ package fr.upem.capcha.images;
 import java.util.List; // data structure used for the properties
 import java.util.stream.Stream; // used for mapping, reducing and other functional programming techniques;
 import java.util.stream.Collectors; // used to convert back Streams into Lists
-import java.io.File; // used to filter subdirectories and files
+import java.io.File; // used to filter sub-directories and files
 import java.net.URL; // used to represent Photos
 import java.util.Random; // used to generate random indexes for the random image getter
 import java.util.Objects;                 // used to check for failed URL to URI conversions
@@ -30,7 +30,7 @@ public class Category implements Images {
 
   /**
    * getter on a random first-level sub-category
-   * @return returns a randomly choozen sub-category
+   * @return returns a randomly chosen sub-category
    */
   public Category getRandomSubCategory() {
     if (subcategories.isEmpty()) return null;
@@ -38,7 +38,7 @@ public class Category implements Images {
   }
 
   /**
-   * recursively gathers all the photos in the category and its subcategories
+   * recursively gathers all the photos in the category and its sub-categories
    * @return collection of URLs
    */
   public List<URL> getPhotos() {
@@ -51,7 +51,7 @@ public class Category implements Images {
   /**
    * selects a random sample of all the photos in the category.
    * <p>
-   * Photos might apprear twice.
+   * Photos might appear twice.
    * We left it this way in case the photo directory doesn't have enough different photos to return.
    * There are solution to allow duplicates only when necessary, but we prefer to keep the code simple. (TODO: Possible future improvement)
    * As long as there isn't less than 3 to 5 photos per directory, this souldn't affect the user experience.
@@ -118,23 +118,23 @@ public class Category implements Images {
   }  
 
   /**
-   * Helper method extracting subcategories from a stream of files.
+   * Helper method extracting sub-categories from a stream of files.
    * <p>
-   * the category constructor is called for each direcotry, building the tree recursively.
+   * the category constructor is called for each directory, building the tree recursively.
    * coded in declarative style programming
    * 
    * @param entries stream of Files object to parse
-   * @return List of categoriess
+   * @return List of categories
    */
   private static List<Category> createCategoriesFromDirectoryEntries(List<File> entries) {
     return entries.stream()
       .filter(File::isDirectory)
       .map(path -> {
-        System.out.println(path.toString());
+        // System.out.println(path.toString());
         try {
           return new Category(path);
         } catch(Exception exception) {
-          System.out.println(exception.getMessage());
+          System.err.println(exception.getMessage());
           return null;
         }
       })
